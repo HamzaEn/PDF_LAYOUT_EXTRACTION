@@ -3,13 +3,6 @@ import warnings
 import pdfplumber
 from io import BytesIO
 
-# Use a try-except block for handling the import error and fall back if needed
-try:
-    import ocrmypdf
-except ImportError as e:
-    st.error("Error importing ocrmypdf. Please make sure the required dependencies are installed.")
-    st.stop()
-
 warnings.filterwarnings("ignore")
 
 # ======================================
@@ -27,13 +20,7 @@ def is_scanned_pdf(file) -> bool:
                 return True
     return False
 
-def ocr(file_path, save_path):
-    try:
-        res = ocrmypdf.ocr(file_path, save_path)
-    except Exception as e:
-        st.error(f"Error running OCR: {e}")
-        return None
-    return res
+# Removed ocrmypdf function and its part
 
 def extract_text_from_pdf_per_page(pdf, x_tolerance, y_tolerance, x_density, y_density):
     pdf = pdfplumber.open(pdf)
@@ -51,41 +38,9 @@ def extract_text_from_pdf_per_page(pdf, x_tolerance, y_tolerance, x_density, y_d
     return pages_text
 
 def extract_text_from_scanned_pdf_per_page(pdf, x_tolerance, y_tolerance, x_density, y_density):
-    # Create a BytesIO object to redirect the OCRmyPDF output
-    output_buffer = BytesIO()
-    input_buffer = pdf
-
-    # Call the ocr() function and redirect the output to the buffer
-    ocr(input_buffer, output_buffer)
-
-    # Get the OCR result from the buffer
-    ocr_result = output_buffer.getvalue()
-
-    # Close the buffer
-    output_buffer.close()
-    input_buffer.close()
-
-    # Create a BytesIO object for pdfplumber to read from the OCR result
-    pdf_buffer = BytesIO(ocr_result)
-
-    # Load the OCR result as a PDF using pdfplumber
-    with pdfplumber.open(pdf_buffer) as pdf:
-        pages_text = []
-        for page_num, page in enumerate(pdf.pages, start=1):
-            text = page.extract_text(
-                x_tolerance=x_tolerance,
-                y_tolerance=y_tolerance,
-                layout=True,
-                x_density=x_density,
-                y_density=y_density
-            )
-            if text:
-                pages_text.append((page_num, text))
-
-    # Close the pdf buffer
-    pdf_buffer.close()
-
-    return pages_text
+    # Since we're no longer using OCR, simply return an empty result for scanned PDFs
+    # or you can add an alternative method for OCR processing here if desired.
+    return []
 
 # ======================================
 # Streamlit App
@@ -93,7 +48,7 @@ def extract_text_from_scanned_pdf_per_page(pdf, x_tolerance, y_tolerance, x_dens
 
 def main():
     st.set_page_config(
-        page_title="OCR Text Extraction Service",
+        page_title="Text Extraction Service",
         page_icon="📝",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -122,8 +77,8 @@ def main():
         </style>""", unsafe_allow_html=True)
 
     # Header
-    st.markdown("<h1 style='text-align: center; color: #4A90E2;'>📝 OCR Text Extraction Service</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Upload your PDF documents to extract text using OCR. Adjust settings for optimal results.</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #4A90E2;'>📝 Text Extraction Service</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Upload your PDF documents to extract text. Adjust settings for optimal results.</p>", unsafe_allow_html=True)
     st.markdown("---")
 
     # Sidebar for pdfplumber parameters
@@ -150,7 +105,7 @@ def main():
                 pdf_bytes = BytesIO(uploaded_file.read())
 
                 if is_scanned_pdf(pdf_bytes):
-                    st.info("🔍 Detected a scanned PDF. Performing OCR...")
+                    st.info("🔍 Detected a scanned PDF. OCR not available, skipping...")
                     pages_text = extract_text_from_scanned_pdf_per_page(
                         pdf_bytes,
                         x_tolerance=x_tolerance,
