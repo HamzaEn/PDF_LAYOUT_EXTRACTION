@@ -1,0 +1,10 @@
+# ultralytics
+transformers
+fastapi
+uvicorn
+
+python-multipart
+pdfplumber==0.6.0
+pytesseract==0.3.8
+ocrmypdf==12.7.2
+pikepdf==2.16.1

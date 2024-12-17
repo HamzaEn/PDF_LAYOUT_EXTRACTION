@@ -1,0 +1,10 @@
+version: '3.8' # Use a version compatible with your setup
+
+services:
+  app:
+    build:
+      context: .  # Location of the Dockerfile (current directory)
+      dockerfile: Dockerfile  # Name of the Dockerfile (default is "Dockerfile")
+    ports:
+      - "8501:8501"  # Map the container's port 80 to your local port 8080 (adjust as needed)
+
