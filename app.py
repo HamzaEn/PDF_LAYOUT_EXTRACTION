@@ -2,7 +2,13 @@ import streamlit as st
 import warnings
 import pdfplumber
 from io import BytesIO
-import ocrmypdf
+
+# Use a try-except block for handling the import error and fall back if needed
+try:
+    import ocrmypdf
+except ImportError as e:
+    st.error("Error importing ocrmypdf. Please make sure the required dependencies are installed.")
+    st.stop()
 
 warnings.filterwarnings("ignore")
 
@@ -22,7 +28,11 @@ def is_scanned_pdf(file) -> bool:
     return False
 
 def ocr(file_path, save_path):
-    res = ocrmypdf.ocr(file_path, save_path)
+    try:
+        res = ocrmypdf.ocr(file_path, save_path)
+    except Exception as e:
+        st.error(f"Error running OCR: {e}")
+        return None
     return res
 
 def extract_text_from_pdf_per_page(pdf, x_tolerance, y_tolerance, x_density, y_density):
@@ -90,9 +100,7 @@ def main():
     )
 
     # Apply custom CSS
-    st.markdown("""
-        <style>
-        /* Customize text area */
+    st.markdown("""<style>
         .page-text-area .stTextArea textarea {
             font-size: 14px;
             height: 400px !important;
@@ -100,21 +108,18 @@ def main():
             overflow: auto;
             white-space: pre-wrap;
         }
-        /* Center the main content */
         .main .block-container{
             padding-top: 2rem;
             padding-bottom: 2rem;
             padding-left: 5rem;
             padding-right: 5rem;
         }
-        /* Customize expander */
         .st-expander{
             border: 1px solid #4A90E2;
             border-radius: 5px;
             background-color: #f9f9f9;
         }
-        </style>
-        """, unsafe_allow_html=True)
+        </style>""", unsafe_allow_html=True)
 
     # Header
     st.markdown("<h1 style='text-align: center; color: #4A90E2;'>📝 OCR Text Extraction Service</h1>", unsafe_allow_html=True)
@@ -186,4 +191,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
